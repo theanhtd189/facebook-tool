@@ -1,84 +1,102 @@
-<!-- Latest compiled and minified CSS -->
-<!-- https://news88.org/?fbclid=IwAR2nwBWAm3Kfq8q2WDDo1hcQUBRQbm0y0-kkwlzlM8hFsTgq4n3U_mYF6l0 -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<div class="container" id="app">
-	<div class="row">
-		<div class="col-lg-8">
-			<div class="form-group">
-				<label for="token">Nhập list token:
-					{{ list_access_token.split("\n").length > 1 ?list_access_token.split("\n").length + " token" : ""
-					}}</label>
-				<textarea class="form-control" v-model="list_access_token" rows="10" required id="tk"></textarea>
+<html>
+
+<head>
+	<meta name="description" content="Test description">
+	<meta property="og:title" content="Test Title" />
+	<meta property="og:type" content="Blog" />
+	<meta property="og:url" content="https://theanhtd189.github.io/facebook-tool/index.html" />
+	<meta property="og:image" content="thumb.png" />
+	<meta property="og:image:secure_url" content="/thumb.png" />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta property="og:image:width" content="400" />
+	<meta property="og:image:height" content="300" />
+	<meta property="og:image:alt" content="Test title" />
+	<link rel="shortcut icon" href="thumb.png" type="image/x-icon">
+	<!-- Latest compiled and minified CSS -->
+	<!-- https://news88.org/?fbclid=IwAR2nwBWAm3Kfq8q2WDDo1hcQUBRQbm0y0-kkwlzlM8hFsTgq4n3U_mYF6l0 -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="container" id="app">
+		<div class="row">
+			<div class="col-lg-8">
+				<div class="form-group">
+					<label for="token">Nhập list token:
+						{{ list_access_token.split("\n").length > 1 ?list_access_token.split("\n").length + " token" :
+						""
+						}}</label>
+					<textarea class="form-control" v-model="list_access_token" rows="10" required id="tk"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="group">Nhập list group:
+						{{ list_group_id.split("\n").length > 1 ?list_group_id.split("\n").length + " group" : "" }}
+					</label>
+					<textarea class="form-control" v-model="list_group_id" rows="10" required id="gr"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="token">Nhập id post cần share:</label>
+					<input type="text" class="form-control" v-model="id_post" id="id_post">
+				</div>
+				<div class="form-group">
+					<label for="token">Nội dung kèm theo: ([Cú pháp RANDOM: (nd1|nd2|nd3|nd4...|ndN) ] - @icon để gọi
+						icon):</label>
+					<textarea v-model="messages" rows="6"
+						placeholder="(thanhdeptrai|nobita76 @icon|nobita76.me|nobita76.info) @icon"
+						class="form-control"></textarea><br>
+				</div>
+				<div class="form-group">
+					<label for="token">Mỗi acc bắn:</label>
+					<input type="number" class="form-control" v-model="numGroup">
+				</div>
+				<div class="form-group">
+					<label for="token">Số luồng:</label>
+					<input type="number" class="form-control" v-model="threads">
+				</div>
+				<div class="form-group">
+					<label for="token">Delay (giây):</label>
+					<input type="number" class="form-control" v-model="delay">
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-success btn-block btn-lg" v-on:click="run_share">CHẠY NGAY
+						ĐI</button>
+				</div>
+				<div class="form-group">
+					<p>Share thành công không cần duyệt: {{ thanhcong }}</p>
+					<p>Share thành công chờ duyệt: {{ thanhcong_choduyet }}</p>
+					<p>Share thất bại: {{ thatbai }}</p>
+					<p>Mỗi luồng share vào: {{ ((list_group_id.split('\n').length>=list_access_token.split('\n').length)
+						?(
+						(list_group_id.split('\n').length % list_access_token.split('\n').length != 0)
+						?(
+						((list_group_id.split('\n').length - (list_group_id.split('\n').length %
+						list_access_token.split('\n').length)) / list_access_token.split('\n').length)
+						+ ' (Dư luồng cuối: share '+ (list_group_id.split('\n').length %
+						list_access_token.split('\n').length) + ")"):( list_group_id.split('\n').length /
+						list_access_token.split('\n').length)
+						)
+						:list_group_id.split('\n').length) + " GROUP" }}
+					</p>
+				</div>
 			</div>
-			<div class="form-group">
-				<label for="group">Nhập list group:
-					{{ list_group_id.split("\n").length > 1 ?list_group_id.split("\n").length + " group" : "" }}
-				</label>
-				<textarea class="form-control" v-model="list_group_id" rows="10" required id="gr"></textarea>
-			</div>
-			<div class="form-group">
-				<label for="token">Nhập id post cần share:</label>
-				<input type="text" class="form-control" v-model="id_post" id="id_post">
-			</div>
-			<div class="form-group">
-				<label for="token">Nội dung kèm theo: ([Cú pháp RANDOM: (nd1|nd2|nd3|nd4...|ndN) ] - @icon để gọi
-					icon):</label>
-				<textarea v-model="messages" rows="6"
-					placeholder="(thanhdeptrai|nobita76 @icon|nobita76.me|nobita76.info) @icon"
-					class="form-control"></textarea><br>
-			</div>
-			<div class="form-group">
-				<label for="token">Mỗi acc bắn:</label>
-				<input type="number" class="form-control" v-model="numGroup">
-			</div>
-			<div class="form-group">
-				<label for="token">Số luồng:</label>
-				<input type="number" class="form-control" v-model="threads">
-			</div>
-			<div class="form-group">
-				<label for="token">Delay (giây):</label>
-				<input type="number" class="form-control" v-model="delay">
-			</div>
-			<div class="form-group">
-				<button type="submit" class="btn btn-success btn-block btn-lg" v-on:click="run_share">CHẠY NGAY
-					ĐI</button>
-			</div>
-			<div class="form-group">
-				<p>Share thành công không cần duyệt: {{ thanhcong }}</p>
-				<p>Share thành công chờ duyệt: {{ thanhcong_choduyet }}</p>
-				<p>Share thất bại: {{ thatbai }}</p>
-				<p>Mỗi luồng share vào: {{ ((list_group_id.split('\n').length>=list_access_token.split('\n').length)
-					?(
-					(list_group_id.split('\n').length % list_access_token.split('\n').length != 0)
-					?(
-					((list_group_id.split('\n').length - (list_group_id.split('\n').length %
-					list_access_token.split('\n').length)) / list_access_token.split('\n').length)
-					+ ' (Dư luồng cuối: share '+ (list_group_id.split('\n').length %
-					list_access_token.split('\n').length) + ")"):( list_group_id.split('\n').length /
-					list_access_token.split('\n').length)
-					)
-					:list_group_id.split('\n').length) + " GROUP" }}
-				</p>
-			</div>
-		</div>
-		<div class="col-lg-4">
-			<div class="form-group">
-				<label for="token">Logs:</label>
-			</div>
-			<div class="form-group">
-				<div v-for="(item, name, index) in logs_threads">
-					Luồng {{ parseInt(name)+1 }}: <span v-bind:style="{ color: item.color }">{{ item.mess }}</span>
+			<div class="col-lg-4">
+				<div class="form-group">
+					<label for="token">Logs:</label>
+				</div>
+				<div class="form-group">
+					<div v-for="(item, name, index) in logs_threads">
+						Luồng {{ parseInt(name)+1 }}: <span v-bind:style="{ color: item.color }">{{ item.mess }}</span>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-
+</body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-toastify@latest"></script>
 <script>
@@ -157,20 +175,18 @@
 							if (n_group >= n_token) {
 								if (n_group % n_token != 0) {
 									this.redundant_group_threads = (n_group % n_token);
-									this.group_threads = (n_group - this.redundant_group_threads ) / n_token;						
+									this.group_threads = (n_group - this.redundant_group_threads) / n_token;
 								}
-								else
-								{
+								else {
 									this.group_threads = n_group / n_token;
 								}
 							}
-							else
-							{
+							else {
 								this.group_threads = n_group;
 							}
 							console.log(this.group_threads)
 							console.log(this.redundant_group_threads)
-							
+
 							for (var i = 0; i < this.threads; i++) {
 								var access_token = this.list_token_ar.splice(0, 1)[0];
 								//var id_group = this.list_group_id_ar.splice(0, 1)[0];
@@ -695,3 +711,5 @@
 	});
 </script>
 </div>
+
+</html>
