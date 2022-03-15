@@ -157,7 +157,7 @@
 							if (n_group >= n_token) {
 								if (n_group % n_token != 0) {
 									this.redundant_group_threads = (n_group % n_token);
-									this.group_threads = (n_group - du ) / n_token;						
+									this.group_threads = (n_group - this.redundant_group_threads ) / n_token;						
 								}
 								else
 								{
