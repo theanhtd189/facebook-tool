@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="content-type" content="text/html" />
+    <meta name="author" content="iljimae" />
+    <link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap.min.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <title>nhận page</title>
+</head>
+
+<body class="container" style="font-size: 15px;padding-top:15px">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">nhận page</h4>
+        </div>
+        <div class="panel-body">
+            <div class="form-group col-md-12">
+                <label for="times">acc clone:<b id="name_admin"></b></label>
+                <input type="text" id="token" class="form-control" placeholder="" />
+            </div>
+            <div class="form-group col-md-12">
+                <button type="submit" class="btn btn-primary btn-block" id="accept">nhận page</button>
+            </div>
+            <div class="form-group col-md-12">
+                <label for="times">
+                    Tổng lời mời page <b id="count_page" class="badge checking">0</b>
+                    - success <b id="live" class="badge checking" style="background: green;">0</b>
+                    - error <b id="die" class="badge checking" style="background: red;">0</b>
+                </label>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="times">list accept success:<b id="live">0</b></label>
+                <textarea type="text" id="result1" class="form-control" placeholder="" rows="10"></textarea>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="times">list accept error:<b id="die">0</b></label>
+                <textarea type="text" id="result2" class="form-control" placeholder="" rows="10"></textarea>
+            </div>
+        </div>
+    </div>
+</body>
+<script script="scripts.js"></script>
+
+</html>

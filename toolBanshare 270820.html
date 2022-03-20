@@ -1,0 +1,384 @@
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<div class="container" id="app">
+    <div class="row">
+			<div class="col-lg-8">
+        <div class="form-group">
+		<label for="token">Nhập list token: {{ list_access_token.split("\n").length > 1 ? list_access_token.split("\n").length + " token" : "" }}</label>
+			<textarea class="form-control" v-model="list_access_token" rows="10"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="token">Nhập id post cần share:</label>
+					<input type="text" class="form-control" v-model="id_post">
+			</div>
+		<div class="form-group">
+                                <label for="token">Mỗi acc bắn:</label>
+                                <input type="number" class="form-control" v-model="numGroup">
+                            </div>
+		<div class="form-group">
+                                <label for="token">Số luồng:</label>
+                                <input type="number" class="form-control" v-model="threads">
+                            </div>
+		<div class="form-group">
+                                <label for="token">Delay (giây):</label>
+                                <input type="number" class="form-control" v-model="delay">
+                            </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success btn-block btn-lg" v-on:click="run_share">CHẠY NGAY ĐI</button>
+				</div>
+				<div class="form-group">
+					<p>Share thành công không cần duyệt: {{ thanhcong }}</p>
+					<p>Share thành công chờ duyệt: {{ thanhcong_choduyet }}</p>
+					<p>Share thất bại: {{ thatbai }}</p>
+			</div>
+			</div>
+				<div class="col-lg-4"><div class="form-group">
+					<label for="token">Logs:</label>
+							</div><div class="form-group">
+								<div v-for="(item, name, index) in logs_threads">
+									Luồng {{ parseInt(name)+1 }}: <span v-bind:style="{ color: item.color }">{{ item.mess }}</span>
+								</div>
+							</div></div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-toastify@latest"></script>
+<script>
+var app = new Vue({
+    el: '#app',
+    data: {
+        list_access_token: '',
+        id_post: '',
+        threads: 30,
+        delay: 20,
+        numGroup: 35,
+        thanhcong: 0,
+        thanhcong_choduyet: 0,
+        thatbai: 0,
+        logs_threads: {
+            0: {
+                color: 'red',
+                mess: 'test'
+            }
+        },
+        list_token_ar: []
+    },
+    methods: {
+        run_share: function() {
+						this.logs_threads = [];
+						this.thanhcong = this.thanhcong_choduyet = this.thatbai = 0;
+						this.list_token_ar = this.list_access_token.split('\n');
+						this.threads = this.list_token_ar > this.threads ? this.threads : this.list_token_ar.length;
+						for(var i = 0; i < this.threads; i++){
+							var access_token = this.list_token_ar.splice(0,1)[0];
+							if(access_token) this.logs_threads[i] = {
+								color: 'black',
+								mess: 'Bắt đầu'
+							};
+							this.check_token({
+								index: i,
+								access_token
+							})
+							.then(a=>this.get_group_token(a))
+							.then(a=>this.pre_share_group(a))
+							.catch(err=>{
+								Vue.set(this.logs_threads, err.index, {
+									color: 'red',
+									mess: err.mess
+								});
+							});
+						}
+				},
+				generateRandomLong: function(){
+					var num = (Math.random()*180).toFixed(3);
+					var posorneg = Math.floor(Math.random());
+					if (posorneg == 0) {
+							num = num * -1;
+					}
+					return num;
+				},
+				generateRandomLat: function() {
+						var num = (Math.random()*90).toFixed(3);
+						var posorneg = Math.floor(Math.random());
+						if (posorneg == 0) {
+								num = num * -1;
+						}
+						return num;
+				},
+				uuid: function() {
+					return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(a) {
+							var b = Math.random() * 16 | 0;
+							a = a == "x" ? b : b & 3 | 8;
+							return a.toString(16)
+					})
+				},
+				check_token: function(data){
+					var ref = this;
+					this.logs_threads[data.index] = {
+						color: 'black',
+						mess: 'Check token...'
+					};
+					return new Promise((resolve, reject) => {
+						fetch("https://graph.facebook.com/me?access_token=" + data.access_token, {
+							"method": "GET"
+						})
+						.then(response => {
+							if(response.status == 200){
+								Vue.set(ref.logs_threads, data.index, {
+									color: 'green',
+									mess: 'Token LIVE. Load list group'
+								});
+								console.log(ref.logs_threads);
+								return response.json();
+							} else {
+								reject({
+									...data,
+									mess: 'Token die'
+								});
+							}
+						})
+						.then(res_json => resolve({
+							...data,
+							status: true,
+							uid: res_json.id
+						}));
+					})
+				},
+				get_group_token: function(data){
+					var ref = this;
+					return new Promise((resolve, reject) => {
+						fetch("https://graph.facebook.com/graphql", {
+								'method': 'post',
+								'headers': {
+										'Accept': 'application/json, text/plain, */*',
+										'Content-Type': 'application/json'
+								},
+								'body': JSON.stringify({
+										'access_token': data.access_token,
+										'doc_id': '2978542488874369',
+										'variables': '{"group_item_small_cover_photo_size":60,"group_item_small_cover_photo_height":60,"badged_group_list_connection_first":1000,"entry_point":"TAB_STORIES","group_list_type":"ALL_GROUPS"}'
+								})
+						})
+						.then(e=>e.json())
+						.then(response => {
+							try{
+								Vue.set(ref.logs_threads, data.index, {
+									color: 'black',
+									mess: 'Load thành công ' + response.data.viewer.groups_tab.badged_group_list.edges.length + ' group'
+								});
+								resolve({
+									...data,
+									list_groups: response.data.viewer.groups_tab.badged_group_list.edges
+								});
+							}catch(e){
+								reject({
+									...data,
+									mess: 'Không load được group'
+								});
+							}
+							
+						})
+					})
+				},
+				pre_share_group: function(data){
+					var ref = this;
+					this.logs_threads[data.index] = {
+						color: 'black',
+						mess: 'Bắt đầu share'
+					};
+					var newlist = data.list_groups.sort(()=> 0.5 - Math.random()).splice(0, this.numGroup);
+					return this.share_group({
+						...data,
+						list_groups: newlist
+					});
+				},
+				share_group: function(data){
+					var ref = this;
+					return new Promise((resolve, reject) => {
+						var uuid = ref.uuid();
+						if(data.list_groups.length <= 0) {
+							Vue.set(ref.logs_threads, data.index, {
+								color: 'red',
+								mess: 'Đã hết group chuyển token mới'
+							});
+							if(ref.list_token_ar.length > 0){
+								var access_token = ref.list_token_ar.splice(0,1)[0];
+								if(access_token) Vue.set(ref.logs_threads, data.index, {
+									color: 'black',
+									mess: 'Bắt đầu'
+								});;
+								ref.check_token({
+									index: data.index,
+									access_token
+								})
+								.then(a=>this.get_group_token(a))
+								.then(a=>this.pre_share_group(a))
+								.catch(err=>{
+									Vue.set(this.logs_threads, err.index, {
+										color: 'red',
+										mess: err.mess
+									});
+								});
+							} else {
+								Vue.set(ref.logs_threads, data.index, {
+									color: 'blue',
+									mess: 'Đã hết token share. HOÀN THÀNH'
+								});
+							}
+							resolve(true);
+						}
+						var group = data.list_groups.splice(0,1)[0].node;
+						Vue.set(ref.logs_threads, data.index, {
+							color: 'black',
+							mess: 'Đang share group ' + group.name + ' (' + group.id+')'
+						});
+						fetch("https://graph.facebook.com/graphql", {
+								'method': 'post',
+								'headers': {
+										'Accept': 'application/json, text/plain, */*',
+										'Content-Type': 'application/json'
+								},
+								'body': JSON.stringify({
+										'access_token': data.access_token,
+										'doc_id': '2981532255309293',
+										'variables': JSON.stringify({
+											'reading_attachment_profile_image_height': 0x195,
+											'enable_ranked_replies': true,
+											'profile_pic_media_type': 'image/x-auto',
+											'poll_facepile_size': 0x78,
+											'image_medium_height': 0x800,
+											'image_large_aspect_width': 0x438,
+											'media_type': 'image/jpeg',
+											'should_fetch_share_count': 'false',
+											'nt_context': {
+												'using_white_navbar': true,
+												'styles_id': '20592abea2ab3e00bd6bef3046cdb20e',
+												'pixel_ratio': 0x3
+											},
+											'default_image_scale': '3',
+											'enable_comment_shares': !![],
+											'angora_attachment_cover_image_size': 0x5a0,
+											'question_poll_count': 0x64,
+											'image_high_height': 0x800,
+											'reading_attachment_profile_image_width': 0x10e,
+											'enable_comment_reactions_icons': !![],
+											'size_style': 'contain-fit',
+											'fetch_fbc_header': !![],
+											'action_location': 'feed',
+											'rich_text_posts_enabled': 'false',
+											'image_medium_width': 0x21c,
+											'angora_attachment_profile_image_size': 0x78,
+											'input': {
+													'producer_supported_features': ['LIGHTWEIGHT_REPLY'],
+													'place_attachment_setting': 'SHOW_ATTACHMENT',
+													'past_time': {
+														'time_since_original_post': 0
+													},
+													'composer_entry_point': 'shareToYourGroupButton',
+													'connection_class': 'EXCELLENT',
+													'composer_entry_picker': 'NULL',
+													'actor_id': data.uid,
+													'is_group_linking_post': ![],
+													'camera_post_context': {
+															'source': 'COMPOSER',
+															'platform': 'FACEBOOK',
+															'deduplication_id': uuid
+													},
+													'action_timestamp': Math.round(new Date().getTime()/1000),
+													'audiences_is_complete': !![],
+													'reshare_original_post': 'SHARE_LINK_ONLY',
+													'coordinates': {
+														'timestamp': new Date().getTime(),
+														'longitude': ref.generateRandomLong(),
+														'latitude': ref.generateRandomLat(),
+														'accuracy':3.9000000953674316,
+													},
+													'attachments': [{
+														'link': {
+															'shared_from_post_id': ref.id_post,
+															'internal_linkable_id': ref.id_post
+														}
+													}],
+													'audiences': [{
+														'wall': {
+															'to_id': group.id
+														}
+													}],
+													'ads_animator_metadata': null,
+													'composer_source_surface': 'newsfeed',
+													'client_mutation_id': '1',
+													'video_start_time_ms': 0x0,
+													'source': 'MOBILE',
+													'composer_session_events_log': {
+														'number_of_keystrokes': 0,
+														'number_of_copy_pastes': 0,
+														'composition_duration': 11
+													},
+													'composer_type': 'share',
+													'sponsor_id': null,
+													'idempotence_token': 'FEED_' + uuid,
+													'is_boost_intended': ![],
+													'is_tags_user_selected': ![],
+													'is_throwback_post': 'NOT_THROWBACK_POST',
+													'message': {
+														'text': '',
+														'ranges': []
+													}
+											},
+											'enable_comment_reactions': !![],
+											'automatic_photo_captioning_enabled': 'false',
+											'image_large_aspect_height': 0x22f,
+											'image_low_width': 0x168,
+											'image_high_width': 0x438,
+											'profile_image_size': 0x78,
+											'poll_voters_count': 0x5,
+											'enable_comment_replies_most_recent': 'true',
+											'max_comment_replies': 0x3,
+											'image_low_height': 0x800
+									})
+								})
+						})
+						.then(e=>e.json())
+						.then(res => {
+							try
+							{
+								console.log(res.data.story_create.items[0].story.url);
+								if(res.data.story_create.items[0].story.url.indexOf('pending') >= 0){
+									ref.thanhcong_choduyet++;
+									Vue.set(ref.logs_threads, data.index, {
+										color: 'pink',
+										mess: 'Share thành công. bài chờ duyệt'
+									});
+								} else {
+									ref.thanhcong++;
+									Vue.set(ref.logs_threads, data.index, {
+										color: 'green',
+										mess: 'Share thành công'
+									});
+								}
+							} catch {
+								ref.thatbai++;
+								console.log('share thất bại');
+								Vue.set(ref.logs_threads, data.index, {
+									color: 'red',
+									mess: 'Share thất bại'
+								});
+							}
+							Vue.set(ref.logs_threads, data.index, {
+								color: 'blue',
+								mess: 'Delay ' + ref.delay + ' giây share tiếp'
+							});
+							setTimeout(() => ref.share_group(data), ref.delay * 1000);
+							resolve(true);
+						})
+					})
+				}
+    }
+});
+</script>
+</div>

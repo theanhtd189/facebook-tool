@@ -1,0 +1,98 @@
+{
+    "access_token": data.access_token,
+    "doc_id": "2981532255309293",
+    "variables": JSON.stringify({
+        "reading_attachment_profile_image_height": 0x195,
+        "enable_ranked_replies": true,
+        "profile_pic_media_type": "image/x-auto",
+        "poll_facepile_size": 0x78,
+        "image_medium_height": 0x800,
+        "image_large_aspect_width": 0x438,
+        "media_type": "image/jpeg",
+        "should_fetch_share_count": "false",
+        "nt_context": {
+            "using_white_navbar": true,
+            "styles_id": "20592abea2ab3e00bd6bef3046cdb20e",
+            "pixel_ratio": 0x3
+        },
+        "default_image_scale": "3",
+        "enable_comment_shares": !![],
+        "angora_attachment_cover_image_size": 0x5a0,
+        "question_poll_count": 0x64,
+        "image_high_height": 0x800,
+        "reading_attachment_profile_image_width": 0x10e,
+        "enable_comment_reactions_icons": !![],
+        "size_style": "contain-fit",
+        "fetch_fbc_header": !![],
+        "action_location": "feed",
+        "rich_text_posts_enabled": "false",
+        "image_medium_width": 0x21c,
+        "angora_attachment_profile_image_size": 0x78,
+        "input": {
+            "producer_supported_features": ["LIGHTWEIGHT_REPLY"],
+            "place_attachment_setting": "SHOW_ATTACHMENT",
+            "past_time": {
+                "time_since_original_post": 0
+            },
+            "composer_entry_point": "shareToYourGroupButton",
+            "connection_class": "EXCELLENT",
+            "composer_entry_picker": "NULL",
+            "actor_id": data.uid,
+            "is_group_linking_post": ![],
+            "camera_post_context": {
+                "source": "COMPOSER",
+                "platform": "FACEBOOK",
+                "deduplication_id": uuid
+            },
+            "action_timestamp": Math.round(new Date().getTime() / 1000),
+            "audiences_is_complete": !![],
+            "reshare_original_post": "SHARE_LINK_ONLY",
+            "coordinates": {
+                "timestamp": new Date().getTime(),
+                "longitude": ref.generateRandomLong(),
+                "latitude": ref.generateRandomLat(),
+                "accuracy": 3.9000000953674316,
+            },
+            "attachments": [{
+                "link": {
+                    "shared_from_post_id": ref.id_post,
+                    "internal_linkable_id": ref.id_post
+                }
+            }],
+            "audiences": [{
+                "wall": {
+                    "to_id": group.id
+                }
+            }],
+            "ads_animator_metadata": null,
+            "composer_source_surface": "newsfeed",
+            "client_mutation_id": "1",
+            "video_start_time_ms": 0x0,
+            "source": "MOBILE",
+            "composer_session_events_log": {
+                "number_of_keystrokes": 0,
+                "number_of_copy_pastes": 0,
+                "composition_duration": 11
+            },
+            "composer_type": "share",
+            "sponsor_id": null,
+            "idempotence_token": "FEED_" + uuid,
+            "is_boost_intended": ![],
+            "is_tags_user_selected": ![],
+            "is_throwback_post": "NOT_THROWBACK_POST",
+            "message": {
+                "text": messageRewrite(ref.messages),
+                "ranges": []
+            }
+        },
+        "enable_comment_reactions": !![],
+        "automatic_photo_captioning_enabled": "false",
+        "image_large_aspect_height": 0x22f,
+        "image_low_width": 0x168,
+        "image_high_width": 0x438,
+        "profile_image_size": 0x78,
+        "poll_voters_count": 0x5,
+        "enable_comment_replies_most_recent": "true",
+        "max_comment_replies": 0x3,
+        "image_low_height": 0x800
+    }

@@ -1,0 +1,11 @@
+{
+	"access_token": "",
+	"doc_id": "2978542488874369",
+	"variables": {
+		"group_item_small_cover_photo_size": 60,
+		"group_item_small_cover_photo_height": 60,
+		"badged_group_list_connection_first": 1000,
+		"entry_point": "TAB_STORIES",
+		"group_list_type": "ALL_GROUPS"
+	}
+}

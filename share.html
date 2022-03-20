@@ -56,10 +56,10 @@
 					<label for="token">Mỗi acc bắn:</label>
 					<input type="number" class="form-control" v-model="numGroup">
 				</div>
-				<div class="form-group">
+				<!-- <div class="form-group">
 					<label for="token">Số luồng:</label>
 					<input type="number" class="form-control" v-model="threads">
-				</div>
+				</div> -->
 				<div class="form-group">
 					<label for="token">Delay (giây):</label>
 					<input type="number" class="form-control" v-model="delay">
@@ -72,7 +72,7 @@
 					<p>Share thành công không cần duyệt: {{ thanhcong }}</p>
 					<p>Share thành công chờ duyệt: {{ thanhcong_choduyet }}</p>
 					<p>Share thất bại: {{ thatbai }}</p>
-					<p>Mỗi luồng share vào: {{ ((list_group_id.split('\n').length>=list_access_token.split('\n').length)
+					<p>Mỗi luồng share vào: {{ ((list_group_id.split('\n').length>list_access_token.split('\n').length)
 						?(
 						(list_group_id.split('\n').length % list_access_token.split('\n').length != 0)
 						?(
@@ -82,7 +82,7 @@
 						list_access_token.split('\n').length) + ")"):( list_group_id.split('\n').length /
 						list_access_token.split('\n').length)
 						)
-						:list_group_id.split('\n').length) + " GROUP" }}
+						:1) + " GROUP" }}
 					</p>
 				</div>
 			</div>
@@ -130,11 +130,11 @@
 	var app = new Vue({
 		el: '#app',
 		data: {
-			list_access_token: 'EAAGNO4a7r2wBAIRZA2GA0g9BiPTz6tbyvy2oxFX7BNuUh72N3tJX5joTqYjEkEdVZBAUr5EpFVNzCsC2xZAqehnpSUaaeZCpNYBWcaWZCnuQRcgdZBpZC58OKHZAEFqkFuk9IlXvdHIJZBIcYTuBQkGTZClKL9fo0ZAJEZAIOcNDptTBmQZDZD\nEAAGNO4a7r2wBAAbErcxGAYgtJ45y1lNrmhH0LRTMsZAg9HZAZAan0Q8Ao0zHc1HVjcJ061ZAFIAyfXWjjl6YwE1x3IbL9ZBpZCwkciriJBA4swQS4UwT7W8psuwbJGNyGoIGU1N4EaTdycZBe0qmOmclZBkdXZCM6A89Yde1EeDG9aXzCE0LZB8VwA',
+			list_access_token: '',
 			list_group_id: '330123938477534\n807084779839822\n224905058930203',
 			messages: '',
-			id_post: '1537827243257091',
-			threads: 8,
+			id_post: '102582059063234',
+			threads: 0,
 			delay: 0,
 			group_threads: 0,
 			redundant_group_threads: 0,
@@ -151,7 +151,10 @@
 			list_token_ar: [],
 			list_group_id_ar: [],
 			new_list_group: [],
-			list_fck_group: []
+			list_fck_group: [],
+			stt_token: [],
+			per_thread: 0,
+			current_index: 0,
 		},
 		methods: {
 			run_share: function () {
@@ -171,11 +174,12 @@
 							this.thanhcong = this.thanhcong_choduyet = this.thatbai = 0;
 							this.list_token_ar = this.list_access_token.split('\n');
 							this.list_group_id_ar = this.list_group_id.split('\n');
-							this.threads = this.list_token_ar > this.threads ? this.threads : this.list_token_ar.length;
+							//this.threads = this.list_token_ar.length > this.list_group_id_ar.length ? this.list_token_ar.length : this.list_token_ar.length;
 							this.messages = this.messages;
 							var n_token = this.list_access_token.split('\n').length;
 							var n_group = this.list_group_id.split('\n').length;
-							if (n_group >= n_token) {
+
+							if (n_group > n_token) {
 								if (n_group % n_token != 0) {
 									this.redundant_group_threads = (n_group % n_token);
 									this.group_threads = (n_group - this.redundant_group_threads) / n_token;
@@ -184,16 +188,30 @@
 									this.group_threads = n_group / n_token;
 								}
 							}
-							else {
+							else 
+							if(n_group == n_token) {
+								this.group_threads = n_token;
+							}
+							else 
+							if(n_group < n_token) {
 								this.group_threads = n_group;
 							}
-							console.log(this.group_threads)
-							console.log(this.redundant_group_threads)
+							this.per_thread = (n_group % this.group_threads!=0)?((n_group - 1)/this.group_threads):(n_group/this.group_threads);
 
-							for (var i = 0; i < this.threads; i++) {
+						
+							console.log('tổng luồng ',this.group_threads)
+							console.log('dư luồng ',this.redundant_group_threads)
+							console.log("mỗi luồng ",this.per_thread)
+
+							//this.threads = this.group_threads;
+							var luot = 1;
+							for (var i = 0; i < this.group_threads; i++) {
 								var access_token = this.list_token_ar.splice(0, 1)[0];
+								access_token = access_token.trim();
+								$("#tk").val(this.list_token_ar)
 								//var id_group = this.list_group_id_ar.splice(0, 1)[0];
-								if (access_token) this.logs_threads[i] = {
+								if (access_token) 
+								this.logs_threads[i] = {
 									color: 'black',
 									mess: 'Bắt đầu'
 								};
@@ -256,21 +274,30 @@
 									color: 'green',
 									mess: 'Token LIVE. Load list group'
 								});
+								this.stt_token[data.index] = true;
 								//console.log(response.json());
 								//console.log('ref.logs_threads: '+ref.logs_threads);
 								return response.json();
 							}
 							else
 								if (response.status == 400) {
+									this.stt_token[data.index] = false;
 									Vue.set(ref.logs_threads, data.index, {
 										color: 'red',
 										mess: 'Token bị checkpoint'
 									});
+									reject({
+										...data,
+										mess: 'Token DIE hoặc CHECKPOINT. STOP ',
+										stt_token: false
+									});
 								}
 								else {
+									this.stt_token[data.index] = false;
 									reject({
 										...data,
 										mess: 'Token die',
+										stt_token: false
 									});
 								}
 						})
@@ -283,6 +310,7 @@
 				})
 			},
 			get_list_group: function (data) {
+				if(this.stt_token[data.index])
 				return new Promise((resolve, reject) => {
 					var id_ = this.list_group_id_ar[data.index];
 					var url_group_api = "https://graph.facebook.com/v2.6/" + id_ + "?access_token=" + data.access_token;
@@ -303,12 +331,23 @@
 						.then(response => {
 							var _fck_group = [];
 							console.log("JSON nhận đc", response)
-							for (var j = 0; j < this.list_group_id_ar.length; j++) {
-								var new_obj = { "node": { "id": this.list_group_id_ar[j], "name": response.name } };
+							// for (var j = this.current_index; j < this.list_group_id_ar.length; j++) {
+							// 	var new_obj = { "node": { "id": this.list_group_id_ar[j], "name": response.name } };
+							// 	_fck_group.push(new_obj);
+							// 	console.log("Đã push group " + this.list_group_id_ar[j])
+							// }
+							console.log("Current index ", this.current_index)
+							var l = 0;
+							while(l<this.per_thread) {
+								var new_obj = { "node": { "id": this.list_group_id_ar[this.current_index], "name": response.name } };
 								_fck_group.push(new_obj);
-								console.log("Đã push group " + this.list_group_id_ar[j])
+								console.log("Đã push group " + this.list_group_id_ar[this.current_index])
+								this.current_index++;
+								l++;
 							}
-							console.log("So luong group ", _fck_group.length)
+							
+							console.log("So luong group trong json ", _fck_group.length)
+							
 							return _fck_group;
 						})
 						.then(kq => {
@@ -523,7 +562,7 @@
 					i++;
 				});
 				var newlist = data.list_groups.sort(() => 0.5 - Math.random()).splice(0, this.numGroup);
-
+				if(this.stt_token[data.index])
 				return this.share_group({
 					...data,
 					list_groups: newlist
@@ -675,12 +714,19 @@
 							})
 						})
 					})
-						.then(e => e.json())
+						//.then(e => e.json())
+						.then((response) => {
+							if(response.ok) {
+								return response.json();
+							}
+							throw new Error('Lỗi share thất bại: ',response)
+						})
 						.then(res => {
-							try {
 								console.log('Link bài share thành công')
-								console.log(res.data.story_create.items[0].story.url);
-								if (res.data.story_create.items[0].story.url.indexOf('pending') >= 0) {
+								console.log(res);
+								//if (res.data.story_create)
+								if (res.data.story_create.items[0].story.url.indexOf('pending') >= 0) 
+								{
 									ref.thanhcong_choduyet++;
 									Vue.set(ref.logs_threads, data.index, {
 										color: 'pink',
@@ -693,20 +739,22 @@
 										mess: 'Share thành công'
 									});
 								}
-							} catch {
-								ref.thatbai++;
-								console.log('share thất bại');
-								Vue.set(ref.logs_threads, data.index, {
-									color: 'red',
-									mess: 'Share thất bại'
-								});
-							}
+
 							Vue.set(ref.logs_threads, data.index, {
 								color: 'blue',
 								mess: 'Delay ' + ref.delay + ' giây share tiếp'
 							});
 							setTimeout(() => ref.share_group(data), ref.delay * 1000);
 							resolve(true);
+						})
+						.catch((error) =>{
+							console.error("catch lỗi share: ",error)
+							ref.thatbai++;
+								console.log('share thất bại');
+								Vue.set(ref.logs_threads, data.index, {
+									color: 'red',
+									mess: 'Share thất bại'
+								});
 						})
 				})
 			}
